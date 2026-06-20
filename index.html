@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>현정's 트레이딩 LIVE</title>
+<title>📺 현정's 리얼 투자 방송</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -13,204 +13,190 @@ body{
     color:white;
 }
 
-/* 🔴 LIVE */
 .topbar{
-    position:fixed;
-    top:0;
-    width:100%;
-    background:black;
-    color:red;
-    text-align:center;
+    background:#000;
     padding:10px;
+    text-align:center;
+    color:red;
     font-weight:bold;
-    z-index:10;
 }
 
-/* 📱 앱 구조 */
-.app{
+.wrap{
     display:flex;
-    height:100vh;
-    padding-top:45px;
+    max-width:1000px;
+    margin:0 auto;
 }
 
-/* 🎥 메인 */
 .main{
     flex:2;
-    display:flex;
-    flex-direction:column;
-    padding:10px;
+    padding:15px;
 }
 
-/* 📈 차트 */
-.chart{
-    flex:1;
-    background:rgba(255,255,255,0.03);
-    border-radius:10px;
-    padding:10px;
-    display:flex;
-    align-items:flex-end;
-    gap:2px;
-}
-
-/* 바 */
-.bar{
-    width:5px;
-    background:#00ffff;
-}
-
-/* 🎤 해설 */
-.stream{
-    background:rgba(255,255,255,0.06);
-    padding:10px;
-    border-radius:10px;
-    margin-top:10px;
-    font-size:13px;
-    min-height:80px;
-    color:#00ffff;
-}
-
-/* 💬 채팅 */
 .chat{
     flex:1;
+    height:90vh;
+    overflow:auto;
     background:rgba(255,255,255,0.05);
     border-left:2px solid #00ffff;
     padding:10px;
-    overflow:auto;
 }
 
-.msg{
-    font-size:12px;
-    margin:3px 0;
-}
-
-/* 💰 상태 */
-.status{
+.card{
     background:rgba(255,255,255,0.06);
-    padding:10px;
-    border-radius:10px;
+    padding:15px;
+    border-radius:12px;
     margin-bottom:10px;
 }
 
-/* 🎮 버튼 */
-.controls{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    display:flex;
-    gap:5px;
-    padding:10px;
-    background:#111;
-}
-
 button{
-    flex:1;
+    width:100%;
     padding:12px;
+    margin:5px 0;
     border:none;
     border-radius:10px;
     font-weight:bold;
     background:#00ffff;
     color:black;
+    cursor:pointer;
 }
 
+.status{
+    font-size:14px;
+    color:#00ffff;
+    min-height:70px;
+    line-height:1.4;
+}
+
+.msg{
+    font-size:13px;
+    margin:4px 0;
+}
+
+.super{
+    color:gold;
+    font-weight:bold;
+}
+
+.end{
+    text-align:center;
+    font-size:22px;
+    margin-top:40px;
+}
+
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">🔴 LIVE | 현정 트레이딩 앱</div>
+<div class="topbar">🔴 LIVE | 현정 투자 방송 (REAL MODE)</div>
 
-<div class="app">
+<div class="wrap">
 
-<!-- 🎥 메인 -->
-<div class="main">
+<div class="main" id="game">
 
-<div class="status">
-💰 자산: <span id="money">100000</span>원
+<div class="card">
+💰 자산: <span id="money">100000</span>원<br>
+👀 시청자: <span id="viewers">1200</span>
 </div>
 
-<!-- 📈 차트 -->
-<div class="chart" id="chart"></div>
+<div class="card status" id="stream">
+🎤 해설:  
+"현재 시장은 변동성이 낮아 보이지만,  
+거래량이 급격히 줄어드는 구간입니다.  
+이럴 때 오히려 큰 변동이 나올 가능성이 있습니다."
+</div>
 
-<!-- 🎤 해설 -->
-<div class="stream" id="stream">
-🎤 해설: 시장은 현재 방향성을 탐색 중입니다.
+<div class="card">
+
+<button onclick="trade('안전')">🟢 안정 투자</button>
+<button onclick="trade('도박')">🔴 고위험 투자</button>
+<button onclick="trade('올인')">💀 올인</button>
+
+</div>
+
+<div class="card">
+<button onclick="superchat()">💸 슈퍼챗 1000원</button>
 </div>
 
 </div>
 
-<!-- 💬 채팅 -->
 <div class="chat" id="chat">
-💬 시청자 입장<br><br>
+💬 시청자 채팅 시작<br><br>
 </div>
 
-</div>
-
-<!-- 🎮 버튼 -->
-<div class="controls">
-<button onclick="trade(1)">🟢</button>
-<button onclick="trade(2)">🔴</button>
-<button onclick="trade(-1)">💸</button>
 </div>
 
 <script>
 
 let money = 100000;
-let price = 100;
-let history = [];
+let viewers = 1200;
+let ended = false;
 
-let users = ["김단타","현정팬","고수","주린이","인버스","손절러","야수"];
+let users = ["김단타","인버스전문가","주린이","현정팬","차트분석러","손절마스터","ETF맨","야수의심장"];
 
 function trade(type){
 
-    let change =
-        type===1 ? Math.random()*12
-        : type===2 ? Math.random()*50
-        : -Math.random()*40;
+    let base = money * (type==="올인"?1:0.3);
 
-    let profit = change * 100;
+    let rate;
 
-    money += profit;
-    price += change;
-
-    if(price < 10) price = 10;
-
-    history.push(price);
-    if(history.length > 50) history.shift();
-
-    drawChart();
-    updateStream(type, profit);
-    updateChat(profit);
-
-    document.getElementById("money").innerText =
-        Math.floor(money).toLocaleString();
-}
-
-function drawChart(){
-
-    let c = document.getElementById("chart");
-    c.innerHTML = "";
-
-    for(let i=0;i<history.length;i++){
-
-        let bar = document.createElement("div");
-        bar.className = "bar";
-        bar.style.height = history[i] + "px";
-        c.appendChild(bar);
+    if(type==="안전"){
+        rate = 0.85 + Math.random()*0.5;
     }
+    else if(type==="도박"){
+        rate = Math.random() < 0.5 ? 3 : 0.25;
+    }
+    else{
+        rate = Math.random() < 0.35 ? 4 : 0.1;
+    }
+
+    let result = Math.floor(base * rate);
+    money = money - base + result;
+
+    document.getElementById("money").innerText = Math.floor(money).toLocaleString();
+
+    updateStream(type, rate, result-base);
+    updateChat(result-base);
+    updateViewers(result-base);
+
+    checkEnd();
 }
 
-function updateStream(type, profit){
+function updateStream(type, rate, profit){
 
     let msg = "";
 
-    if(type===1){
-        msg = "🎤 해설: 안정적인 매수 전략입니다. 변동성 대비 리스크는 낮지만 수익도 제한적입니다.";
+    if(type === "안전"){
+        msg =
+`🎤 해설:
+"안정 투자는 리스크를 줄이는 전략입니다.
+하지만 지금처럼 변동성이 커질 때는
+수익률이 제한될 수 있습니다.
+
+현재 배팅 구조상 기대값은 낮지만
+손실 방어에는 유리한 선택입니다."`;
     }
-    if(type===2){
-        msg = "🎤 해설: 공격적인 매수입니다. 방향 맞으면 큰 수익, 틀리면 급락 위험이 있습니다.";
+
+    if(type === "도박"){
+        msg =
+`🎤 해설:
+"지금 선택은 고위험 전략입니다.
+성공하면 2~3배 수익이 가능하지만,
+반대로 큰 손실 가능성도 매우 높습니다.
+
+시장 방향이 불확실한 상황에서는
+가장 심리 싸움이 중요한 선택입니다."`;
     }
-    if(type===-1){
-        msg = "🎤 해설: 매도 전략입니다. 하락 리스크 회피 또는 차익 실현 구간입니다.";
+
+    if(type === "올인"){
+        msg =
+`🎤 해설:
+"올인은 사실상 시장 방향에 모든 자산을 맡기는 선택입니다.
+성공 시 게임을 뒤집을 수 있지만
+실패 시 즉시 게임 종료급 손실이 발생합니다.
+
+지금은 확률적으로 매우 위험한 구간입니다."`;
     }
 
     document.getElementById("stream").innerText = msg;
@@ -220,29 +206,86 @@ function updateChat(profit){
 
     let chat = document.getElementById("chat");
 
-    let msgs =
-        profit > 5000
-        ? ["🚀 미쳤다","GOAT","풀매수"]
-        : profit < -5000
-        ? ["ㅋㅋㅋ 망","손절각","끝났다"]
-        : ["애매","관망","노잼"];
+    let msgs;
 
-    for(let i=0;i<3;i++){
+    if(profit > 50000){
+        msgs = [
+            "이건 진짜 미쳤다",
+            "데이터상 말이 안되는데?",
+            "와 이건 인정해야지",
+            "지금 들어간 사람 승자"
+        ];
+    }
+    else if(profit < -50000){
+        msgs = [
+            "ㅋㅋㅋㅋ 끝났다",
+            "손절 안함?",
+            "이건 진짜 아니다",
+            "멘탈 터졌다"
+        ];
+    }
+    else{
+        msgs = [
+            "지금 애매한 구간임",
+            "관망이 맞는듯",
+            "아직 판단 불가",
+            "큰거 온다 느낌"
+        ];
+    }
 
+    for(let i=0;i<4;i++){
         let div = document.createElement("div");
-        div.className = "msg";
-
+        div.className="msg";
         div.innerText =
-            users[Math.floor(Math.random()*users.length)]
-            + ": "
-            + msgs[Math.floor(Math.random()*msgs.length)];
+        users[Math.floor(Math.random()*users.length)] + ": " +
+        msgs[Math.floor(Math.random()*msgs.length)];
 
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
     }
 }
 
-drawChart();
+function updateViewers(profit){
+
+    if(profit > 50000) viewers += 300;
+    else if(profit < -50000) viewers -= 400;
+    else viewers += Math.floor(Math.random()*100 - 50);
+
+    if(viewers < 100) viewers = 100;
+
+    document.getElementById("viewers").innerText = viewers;
+}
+https://github.com/usso8000kr-ship-it/usso8000kr-ship-it.github.io/tree/main
+function superchat(){ㅔ
+
+    money += 1000;
+    viewers += 50;
+
+    let chat = document.getElementById("chat");
+
+    let div = document.createElement("div");
+    div.className="msg super";
+    div.innerText = "💸 슈퍼챗: 1000원 감사합니다!";
+
+    chat.appendChild(div);
+}
+
+function checkEnd(){
+
+    if(money <= 0){
+        end("💀 파산 엔딩\n방송 종료");
+    }
+
+    if(viewers <= 80){
+        end("📉 시청자 이탈\n방송 폭망");
+    }
+}
+
+function end(text){
+
+    document.getElementById("game").innerHTML =
+    "<div class='end'>" + text + "</div>";
+}
 
 </script>
 
