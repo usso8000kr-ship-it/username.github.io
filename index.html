@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>현정's 트레이딩 LIVE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#0b0b10;
+    color:white;
+}
+
+/* 🔴 LIVE */
+.topbar{
+    position:fixed;
+    top:0;
+    width:100%;
+    background:black;
+    color:red;
+    text-align:center;
+    padding:10px;
+    font-weight:bold;
+    z-index:10;
+}
+
+/* 📱 앱 구조 */
+.app{
+    display:flex;
+    height:100vh;
+    padding-top:45px;
+}
+
+/* 🎥 메인 */
+.main{
+    flex:2;
+    display:flex;
+    flex-direction:column;
+    padding:10px;
+}
+
+/* 📈 차트 */
+.chart{
+    flex:1;
+    background:rgba(255,255,255,0.03);
+    border-radius:10px;
+    padding:10px;
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+}
+
+/* 바 */
+.bar{
+    width:5px;
+    background:#00ffff;
+}
+
+/* 🎤 해설 */
+.stream{
+    background:rgba(255,255,255,0.06);
+    padding:10px;
+    border-radius:10px;
+    margin-top:10px;
+    font-size:13px;
+    min-height:80px;
+    color:#00ffff;
+}
+
+/* 💬 채팅 */
+.chat{
+    flex:1;
+    background:rgba(255,255,255,0.05);
+    border-left:2px solid #00ffff;
+    padding:10px;
+    overflow:auto;
+}
+
+.msg{
+    font-size:12px;
+    margin:3px 0;
+}
+
+/* 💰 상태 */
+.status{
+    background:rgba(255,255,255,0.06);
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+/* 🎮 버튼 */
+.controls{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    display:flex;
+    gap:5px;
+    padding:10px;
+    background:#111;
+}
+
+button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    font-weight:bold;
+    background:#00ffff;
+    color:black;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">🔴 LIVE | 현정 트레이딩 앱</div>
+
+<div class="app">
+
+<!-- 🎥 메인 -->
+<div class="main">
+
+<div class="status">
+💰 자산: <span id="money">100000</span>원
+</div>
+
+<!-- 📈 차트 -->
+<div class="chart" id="chart"></div>
+
+<!-- 🎤 해설 -->
+<div class="stream" id="stream">
+🎤 해설: 시장은 현재 방향성을 탐색 중입니다.
+</div>
+
+</div>
+
+<!-- 💬 채팅 -->
+<div class="chat" id="chat">
+💬 시청자 입장<br><br>
+</div>
+
+</div>
+
+<!-- 🎮 버튼 -->
+<div class="controls">
+<button onclick="trade(1)">🟢</button>
+<button onclick="trade(2)">🔴</button>
+<button onclick="trade(-1)">💸</button>
+</div>
+
+<script>
+
+let money = 100000;
+let price = 100;
+let history = [];
+
+let users = ["김단타","현정팬","고수","주린이","인버스","손절러","야수"];
+
+function trade(type){
+
+    let change =
+        type===1 ? Math.random()*12
+        : type===2 ? Math.random()*50
+        : -Math.random()*40;
+
+    let profit = change * 100;
+
+    money += profit;
+    price += change;
+
+    if(price < 10) price = 10;
+
+    history.push(price);
+    if(history.length > 50) history.shift();
+
+    drawChart();
+    updateStream(type, profit);
+    updateChat(profit);
+
+    document.getElementById("money").innerText =
+        Math.floor(money).toLocaleString();
+}
+
+function drawChart(){
+
+    let c = document.getElementById("chart");
+    c.innerHTML = "";
+
+    for(let i=0;i<history.length;i++){
+
+        let bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.height = history[i] + "px";
+        c.appendChild(bar);
+    }
+}
+
+function updateStream(type, profit){
+
+    let msg = "";
+
+    if(type===1){
+        msg = "🎤 해설: 안정적인 매수 전략입니다. 변동성 대비 리스크는 낮지만 수익도 제한적입니다.";
+    }
+    if(type===2){
+        msg = "🎤 해설: 공격적인 매수입니다. 방향 맞으면 큰 수익, 틀리면 급락 위험이 있습니다.";
+    }
+    if(type===-1){
+        msg = "🎤 해설: 매도 전략입니다. 하락 리스크 회피 또는 차익 실현 구간입니다.";
+    }
+
+    document.getElementById("stream").innerText = msg;
+}
+
+function updateChat(profit){
+
+    let chat = document.getElementById("chat");
+
+    let msgs =
+        profit > 5000
+        ? ["🚀 미쳤다","GOAT","풀매수"]
+        : profit < -5000
+        ? ["ㅋㅋㅋ 망","손절각","끝났다"]
+        : ["애매","관망","노잼"];
+
+    for(let i=0;i<3;i++){
+
+        let div = document.createElement("div");
+        div.className = "msg";
+
+        div.innerText =
+            users[Math.floor(Math.random()*users.length)]
+            + ": "
+            + msgs[Math.floor(Math.random()*msgs.length)];
+
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
+}
+
+drawChart();
+
+</script>
+
+</body>
+</html>
